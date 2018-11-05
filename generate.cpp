@@ -4,7 +4,7 @@
 
 
 int main(int argc, char const *argv[]){
-  MapGenerator mapGenerator(5, 10);
+  MapGenerator mapGenerator(10, 20);
   Cell** map = mapGenerator.generateMap();
   mapGenerator.printMap();
 }
