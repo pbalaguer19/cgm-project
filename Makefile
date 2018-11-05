@@ -1,2 +1,2 @@
 all:
-	g++ test.cpp -o test -std=c++0x -lm
+	g++ generate.cpp -o generate -std=c++0x -lm
