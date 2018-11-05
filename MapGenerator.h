@@ -6,7 +6,7 @@ private:
   int height;
   Cell** map;
 
-  Cell** mapGeneratorDFS(int x, int y);
+  void mapGeneratorDFS(Cell** map, int x, int y);
   bool cornersVisited(int i, int j);
 public:
   MapGenerator(int h, int w);
@@ -32,7 +32,8 @@ MapGenerator::MapGenerator(int h, int w){
 }
 
 Cell** MapGenerator::generateMap(){
-  return mapGeneratorDFS(0, 0);
+  mapGeneratorDFS(map, 0, 0);
+  return map;
 }
 
 void MapGenerator::printMap(){
@@ -53,15 +54,16 @@ int MapGenerator::getHeight(){
   return height;
 }
 
-Cell** MapGenerator::mapGeneratorDFS(int x, int y){
+void MapGenerator::mapGeneratorDFS(Cell** map, int x, int y){
   int direct[][2] = {{0,1}, {0,-1}, {-1,0}, {1,0}};
   int visitOrder[] = {0,1,2,3};
 
   if(x < 0 || y < 0 || x >= height || y >= width) return ;
-  if(map[x][y].getCellType() == CORRIDOR) return;
-  if(cornersVisited(x, y)) return;
+  if(map[x][y].getCellType() == CORRIDOR) return ;
+  if(cornersVisited(x, y)) return ;
 }
 
+// This function is the responsible of avoiding a 2x2 matrix of corridors cells.
 bool MapGenerator::cornersVisited(int i, int j){
   /*
   Array with all neighbors of a given position. This is sorted following:
@@ -86,9 +88,9 @@ bool MapGenerator::cornersVisited(int i, int j){
       int njnext = j + neightbors[((k+1) % 8)][1];
 
       //out of boundary tests
-      if(ni < 0 || nj < 0 || ni >= map.size() || nj >= map[0].size()) continue;
-      if(niprev < 0 || njprev < 0 || niprev >= map.size() || njprev >= map[0].size()) continue;
-      if(ninext < 0 || njnext < 0 || ninext >= map.size() || njnext >= map[0].size()) continue;
+      if(ni < 0 || nj < 0 || ni >= height || nj >= width) continue;
+      if(niprev < 0 || njprev < 0 || niprev >= height || njprev >= width) continue;
+      if(ninext < 0 || njnext < 0 || ninext >= height || njnext >= width) continue;
 
       //If the corner and its next and previous neighbors are corridors, then return true
       if(map[ni][nj].getCellType() == CORRIDOR &&
