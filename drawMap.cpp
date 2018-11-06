@@ -34,12 +34,13 @@ int main(int argc,char *argv[])
   glutInitWindowSize(WIDTH, HEIGHT);
   glutCreateWindow("PACMAN MAP");
 
-  if(argc != 3) {
-    std::cout << "Incorrect number of parameters\n";
-    return 0;
+  if(argc < 3){
+      std::cout << "./generate HEIGHT WIDTH" << "\n\n";
+      std::cout << "MapGenerator rules:" << '\n';
+      std::cout << " - Height >= 11. Always an even number" << '\n';
+      std::cout << " - Width >= 9." << '\n';
+      return 0;
   }
-
-  std::cout << "Pacman game\n";
 
   int h = atoi(argv[1]);
   int w = atoi(argv[2]);
@@ -48,6 +49,7 @@ int main(int argc,char *argv[])
 
   MapGenerator mapGenerator(h, w);
   map = mapGenerator.generateMap();
+  mapGenerator.printMap();
 
   glutDisplayFunc(displayMap);
   glutReshapeFunc(windowReshapeFunc);
