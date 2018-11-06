@@ -11,10 +11,10 @@
 
 
 int WIDTH = 700;
-int HEIGHT = 500;
-Cell** map;
+int HEIGHT = 700;
 int COLUMNS;
 int ROWS;
+Cell** map;
 
 //-----------------------------------------------
 
@@ -28,11 +28,6 @@ void windowReshapeFunc( GLint newWidth, GLint newHeight );
 
 int main(int argc,char *argv[])
 {
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-  glutInitWindowPosition(50, 50);
-  glutInitWindowSize(WIDTH, HEIGHT);
-  glutCreateWindow("PACMAN MAP");
 
   if(argc < 3){
       std::cout << "./generate HEIGHT WIDTH" << "\n\n";
@@ -47,6 +42,12 @@ int main(int argc,char *argv[])
   ROWS = h;
   COLUMNS = w;
 
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+  glutInitWindowPosition(50, 50);
+  glutInitWindowSize(WIDTH, HEIGHT);
+  glutCreateWindow("PACMAN MAP");
+
   MapGenerator mapGenerator(h, w);
   map = mapGenerator.generateMap();
   mapGenerator.printMap();
@@ -58,6 +59,7 @@ int main(int argc,char *argv[])
   gluOrtho2D(0,WIDTH-1,0,HEIGHT-1);
 
   glutMainLoop();
+  displayMap();
   return 0;
 }
 
@@ -72,17 +74,18 @@ void displayMap()
   glClearColor(0.0,0.0,1.0,0.0);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  for(i=0; i<ROWS; i++) {
-    for(j=0; j<COLUMNS; j++){
-      cell = map[i][j];
+  for(i=0; i<COLUMNS; i++) {
+    for(j=0; j<ROWS; j++){
+      cell = map[j][i];
+
       if(cell.getCellType() == CORRIDOR) {
         glColor3f(0.8,0.8,0.8);
         glBegin(GL_QUADS);
 
         glVertex2i(i*WIDTH/COLUMNS,j*HEIGHT/ROWS);
-        glVertex2i((i+1)*WIDTH/COLUMNS,j*HEIGHT/ROWS);
-        glVertex2i((i+1)*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS);
-        glVertex2i(i*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS);
+    	  glVertex2i((i+1)*WIDTH/COLUMNS,j*HEIGHT/ROWS);
+    	  glVertex2i((i+1)*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS);
+    	  glVertex2i(i*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS);
 
         glEnd();
       }
@@ -93,8 +96,5 @@ void displayMap()
 }
 
 void windowReshapeFunc( GLint newWidth, GLint newHeight ) {
-  WIDTH = newWidth;
-  HEIGHT = newHeight;
-
-  glutPostRedisplay();
+  glutReshapeWindow( WIDTH, HEIGHT);
 }

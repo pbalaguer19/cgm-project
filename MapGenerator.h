@@ -1,7 +1,7 @@
 #include <iostream>
 #include "ctime"
-#define MIN_HEIGHT 11
-#define MIN_WIDTH 9
+#define MIN_HEIGHT 9
+#define MIN_WIDTH 11
 
 class MapGenerator{
 private:
@@ -67,16 +67,6 @@ void MapGenerator::printMap(){
   for (int x = 0; x < height; ++x) {
     for (int y = 0; y < width; ++y) {
       if(finalMap[x][y].getCellType() == WALL) std::cout << "#";
-      else std::cout << "·";
-    }
-    std::cout << "\n";
-  }
-  std::cout << "\n";
-  std::cout << "\n";
-
-  for (int x = 0; x < height; ++x) {
-    for (int y = 0; y < halfWidth; ++y) {
-      if(halfMap[x][y].getCellType() == WALL) std::cout << "#";
       else std::cout << "·";
     }
     std::cout << "\n";
@@ -165,11 +155,26 @@ void MapGenerator::swap(int & a, int &b){
 
 void MapGenerator::createCorners(){
   for (int x = 0; x < height; ++x) {
+    halfMap[x][halfWidth - 2].setCellType(CORRIDOR);
     halfMap[x][halfWidth - 1].setCellType(WALL);
   }
   for (int y = 0; y < halfWidth; ++y) {
+    if(y != halfWidth-1){
+      halfMap[1][y].setCellType(CORRIDOR);
+      halfMap[height-2][y].setCellType(CORRIDOR);
+    }
+
     halfMap[0][y].setCellType(WALL);
     halfMap[height-1][y].setCellType(WALL);
+  }
+
+  for (int x = 0; x < 3; ++x) {
+    for (int y = 0; y < 3; ++y){
+      CellType c = CORRIDOR;
+      if(x == 2 || y == 2) c = WALL;
+      halfMap[(int) (height/2) + y][x].setCellType(c);
+      halfMap[(int) (height/2) - y][x].setCellType(c);
+    }
   }
 }
 
@@ -182,6 +187,6 @@ void MapGenerator::mapMirroring(){
   }
   for (int x = 1; x < height-1; ++x) {
     // All corridors except the two borders and the position (heigth/2 + 3).
-    if(x != (height/2)+3) finalMap[x][halfWidth].setCellType(CORRIDOR);
+    if(x != (height/2)+2) finalMap[x][halfWidth].setCellType(CORRIDOR);
   }
 }
