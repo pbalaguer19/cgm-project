@@ -168,10 +168,11 @@ void MapGenerator::createCorners(){
     halfMap[height-1][y].setCellType(WALL);
   }
 
-  for (int x = 0; x < 3; ++x) {
-    for (int y = 0; y < 3; ++y){
+  for (int x = 0; x < 4; ++x) {
+    for (int y = 0; y < 4; ++y){
       CellType c = CORRIDOR;
       if(x == 2 || y == 2) c = WALL;
+      if(x == 3 || y == 3) c = CORRIDOR;
       halfMap[(int) (height/2) + y][x].setCellType(c);
       halfMap[(int) (height/2) - y][x].setCellType(c);
     }

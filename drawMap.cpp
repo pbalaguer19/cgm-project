@@ -9,6 +9,10 @@
 #include "Cell.h"
 #include "MapGenerator.h"
 
+/*
+Students: Pau Balaguer and Didac Florensa
+Practice 1. Exercise 2
+*/
 
 int WIDTH = 700;
 int HEIGHT = 700;
@@ -26,8 +30,7 @@ void windowReshapeFunc( GLint newWidth, GLint newHeight );
 // -- MAIN PROCEDURE
 //-----------------------------------------------
 
-int main(int argc,char *argv[])
-{
+int main(int argc,char *argv[]){
 
   if(argc < 3){
       std::cout << "./generate HEIGHT WIDTH" << "\n\n";
@@ -56,18 +59,16 @@ int main(int argc,char *argv[])
   glutReshapeFunc(windowReshapeFunc);
 
   glMatrixMode(GL_PROJECTION);
-  gluOrtho2D(0,WIDTH-1,0,HEIGHT-1);
+  gluOrtho2D(0,WIDTH-1,HEIGHT-1, 0);
 
   glutMainLoop();
-  displayMap();
   return 0;
 }
 
 //------------------------------------------------------------
 
 //------------------------------------------------------------
-void displayMap()
-{
+void displayMap(){
   int i,j;
   Cell cell;
 
@@ -80,13 +81,16 @@ void displayMap()
 
       if(cell.getCellType() == CORRIDOR) {
         glColor3f(0.8,0.8,0.8);
-        glBegin(GL_QUADS);
-
-        glVertex2i(i*WIDTH/COLUMNS,j*HEIGHT/ROWS);
-    	  glVertex2i((i+1)*WIDTH/COLUMNS,j*HEIGHT/ROWS);
-    	  glVertex2i((i+1)*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS);
-    	  glVertex2i(i*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS);
-
+        //glBegin(GL_QUADS);
+        //glVertex2i(i*WIDTH/COLUMNS,j*HEIGHT/ROWS);
+    	  //glVertex2i((i+1)*WIDTH/COLUMNS,j*HEIGHT/ROWS);
+    	  //glVertex2i((i+1)*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS);
+    	  //glVertex2i(i*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS);
+        glBegin(GL_POLYGON);
+        glVertex3f(i*WIDTH/COLUMNS, j*HEIGHT/ROWS, 0.0);
+        glVertex3f((i+1)*WIDTH/COLUMNS,j*HEIGHT/ROWS, 0.0);
+        glVertex3f((i+1)*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS, 0.0);
+        glVertex3f(i*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS, 0.0);
         glEnd();
       }
     }
@@ -96,5 +100,5 @@ void displayMap()
 }
 
 void windowReshapeFunc( GLint newWidth, GLint newHeight ) {
-  glutReshapeWindow( WIDTH, HEIGHT);
+  glutReshapeWindow(WIDTH, HEIGHT);
 }

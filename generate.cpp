@@ -2,6 +2,10 @@
 #include "Cell.h"
 #include "MapGenerator.h"
 
+/*
+Students: Pau Balaguer and Didac Florensa
+Practice 1. Exercise 1
+*/
 
 int main(int argc, char const *argv[]){
   int width = 11;
