@@ -1,4 +1,4 @@
-enum CellType{WALL, CORRIDOR};
+enum CellType{WALL, CORRIDOR, FOOD, JAIL, GHOST, PLAYER};
 
 class Cell{
 private:

@@ -14,20 +14,29 @@ Students: Pau Balaguer and Didac Florensa
 Practice 1. Exercise 2
 */
 
-int WIDTH = 500;
-int HEIGHT = 500;
+float WIDTH = 500.0;
+float HEIGHT = 500.0;
 int COLUMNS;
 int ROWS;
+float pixelsPerColmns;
+float pixelsPerRow;
 Cell** map;
 int sizeCellX;
 int sizeCellY;
 
+int playerXPos = 1;
+int playerYPos = 1;
+
 //-----------------------------------------------
 
 void displayMap();
-void drawFood();
+void drawCorridor(Cell cell, int i, int j);
+void drawFood(Cell cell, int i, int j);
+void checkPlayer(Cell cell, int i, int j);
 float getPosition(int n, float CellSize);
 void windowReshapeFunc( GLint newWidth, GLint newHeight );
+void keyboard(int key, int x, int y);
+
 //-----------------------------------------------
 
 //-----------------------------------------------
@@ -49,6 +58,9 @@ int main(int argc,char *argv[]){
   ROWS = h;
   COLUMNS = w;
 
+  pixelsPerColmns = WIDTH / COLUMNS;
+  pixelsPerRow = HEIGHT / ROWS;
+
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
   glutInitWindowPosition(50, 50);
@@ -57,13 +69,15 @@ int main(int argc,char *argv[]){
 
   MapGenerator mapGenerator(h, w);
   map = mapGenerator.generateMap();
+  map[playerXPos][playerYPos].setCellType(PLAYER);
   mapGenerator.printMap();
 
   glutDisplayFunc(displayMap);
   glutReshapeFunc(windowReshapeFunc);
+  glutSpecialFunc(keyboard);
 
   glMatrixMode(GL_PROJECTION);
-  gluOrtho2D(0,WIDTH-1,HEIGHT-1, 0);
+  gluOrtho2D(0,WIDTH-1, 0, HEIGHT-1);
 
   glutMainLoop();
   return 0;
@@ -82,26 +96,11 @@ void displayMap(){
   for(i=0; i<COLUMNS; i++) {
     for(j=0; j<ROWS; j++){
       cell = map[j][i];
-
-      if(cell.getCellType() == CORRIDOR) {
-        glColor3f(0.8,0.8,0.8);
-        //glBegin(GL_QUADS);
-        //glVertex2i(i*WIDTH/COLUMNS,j*HEIGHT/ROWS);
-    	  //glVertex2i((i+1)*WIDTH/COLUMNS,j*HEIGHT/ROWS);
-    	  //glVertex2i((i+1)*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS);
-    	  //glVertex2i(i*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS);
-        glBegin(GL_POLYGON);
-        glVertex3f(i*WIDTH/COLUMNS, j*HEIGHT/ROWS, 0.0);
-        glVertex3f((i+1)*WIDTH/COLUMNS,j*HEIGHT/ROWS, 0.0);
-        glVertex3f((i+1)*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS, 0.0);
-        glVertex3f(i*WIDTH/COLUMNS,(j+1)*HEIGHT/ROWS, 0.0);
-        glEnd();
-      }
+      drawCorridor(cell, i, j);
+      drawFood(cell, i, j);
+      checkPlayer(cell, i, j);
     }
   }
-
-  drawFood();
-
   glutSwapBuffers();
 }
 
@@ -109,32 +108,72 @@ void windowReshapeFunc( GLint newWidth, GLint newHeight ) {
   glutReshapeWindow(WIDTH, HEIGHT);
 }
 
-void drawFood() {
-  //float xCell = WIDTH / COLUMNS;
-  //float yCell = HEIGHT / ROWS;
-  float CellSizeX = WIDTH / COLUMNS;
-  float CellSizeY = HEIGHT / ROWS;
-  float x, y; //First cell (0,0)
-  Cell cell;
-  for(int i=0; i<COLUMNS; i++) {
-    for(int j=0; j<ROWS; j++){
-      cell = map[j][i];
-      if(cell.getCellType() == CORRIDOR)
-      {
-        x = getPosition(j, CellSizeX);
-        y = getPosition(i, CellSizeY);
-        glColor3f(1,1,1);
-        glBegin(GL_QUADS);
-        glVertex2i(x-3,y-3);
-        glVertex2i(x+3,y-3);
-        glVertex2i(x+3,y+3);
-        glVertex2i(x-3,y+3);
-        glEnd();
-      }
-    }
+void keyboard(int key, int x, int y){
+  int oldX = playerXPos;
+  int oldY = playerYPos;
+
+  switch(key){
+    case GLUT_KEY_UP:
+      playerXPos ++;
+      break;
+    case GLUT_KEY_DOWN:
+      playerXPos --;
+      break;
+    case GLUT_KEY_LEFT:
+      playerYPos --;
+      break;
+    case GLUT_KEY_RIGHT:
+      playerYPos ++;
+      break;
+  }
+  map[oldX][oldY].setCellType(CORRIDOR);
+  map[playerXPos][playerYPos].setCellType(PLAYER);
+  glutPostRedisplay();
+
+};
+
+void drawCorridor(Cell cell, int i, int j){
+  if(cell.getCellType() != WALL) {
+    glColor3f(0.8,0.8,0.8);
+    glBegin(GL_QUADS);
+    glVertex2i(i*pixelsPerColmns,j*pixelsPerRow);
+    glVertex2i((i+1)*pixelsPerColmns,j*pixelsPerRow);
+    glVertex2i((i+1)*pixelsPerColmns,(j+1)*pixelsPerRow);
+    glVertex2i(i*pixelsPerColmns,(j+1)*pixelsPerRow);
+    glEnd();
   }
 }
 
-float getPosition(int n, float CellSize) {
-  return ((n * CellSize) + (CellSize / 2)) ;
+void drawFood(Cell cell, int i, int j) {
+  float x, y;
+  if(cell.getCellType() == FOOD){
+    x = getPosition(i, pixelsPerColmns);
+    y = getPosition(j, pixelsPerRow);
+    glColor3f(1,1,1);
+    glBegin(GL_QUADS);
+    glVertex2i(x-3,y-3);
+    glVertex2i(x+3,y-3);
+    glVertex2i(x+3,y+3);
+    glVertex2i(x-3,y+3);
+    glEnd();
+  }
+}
+
+void checkPlayer(Cell cell, int i, int j) {
+  float x, y;
+  if(cell.getCellType() == PLAYER){
+    x = getPosition(i, pixelsPerColmns);
+    y = getPosition(j, pixelsPerRow);
+    glColor3f(1,1,0);
+    glBegin(GL_QUADS);
+    glVertex2i(x-4,y-4);
+    glVertex2i(x+4,y-4);
+    glVertex2i(x+4,y+4);
+    glVertex2i(x-4,y+4);
+    glEnd();
+  }
+}
+
+float getPosition(int n, float pixels) {
+  return ((n * pixels) + (pixels / 2)) ;
 }

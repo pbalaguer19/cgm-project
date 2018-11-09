@@ -64,10 +64,12 @@ Cell** MapGenerator::generateMap(){
 }
 
 void MapGenerator::printMap(){
-  for (int x = 0; x < height; ++x) {
+  for (int x = height-1; x > -1; --x) {
     for (int y = 0; y < width; ++y) {
       if(finalMap[x][y].getCellType() == WALL) std::cout << "#";
-      else std::cout << "·";
+      else if(finalMap[x][y].getCellType() == FOOD) std::cout << "·";
+      else if(finalMap[x][y].getCellType() == JAIL) std::cout << "X";
+      else std::cout << " ";
     }
     std::cout << "\n";
   }
@@ -87,11 +89,11 @@ void MapGenerator::mapGeneratorDFS(Cell** halfMap, int x, int y){
 
   // If one of this three cases are true, then we don't change the Cell state.
   if(x < 0 || y < 0 || x >= height || y >= halfWidth) return ;
-  if(halfMap[x][y].getCellType() == CORRIDOR) return ;
+  if(halfMap[x][y].getCellType() == FOOD) return ;
   if(cornersVisited(x, y)) return ;
 
   // If the three previous conditions are false, then the cell state will be CORRIDOR
-  halfMap[x][y].setCellType(CORRIDOR);
+  halfMap[x][y].setCellType(FOOD);
 
   // Shuffle the visitOrder Array
   shuffle(visitOrder, 4);
@@ -133,9 +135,9 @@ bool MapGenerator::cornersVisited(int i, int j){
       if(ninext < 0 || njnext < 0 || ninext >= height || njnext >= halfWidth) continue;
 
       //If the corner and its next and previous neighbors are corridors, then return true
-      if(halfMap[ni][nj].getCellType() == CORRIDOR &&
-         halfMap[niprev][njprev].getCellType() == CORRIDOR &&
-         halfMap[ninext][njnext].getCellType() == CORRIDOR) return true;
+      if(halfMap[ni][nj].getCellType() == FOOD &&
+         halfMap[niprev][njprev].getCellType() == FOOD &&
+         halfMap[ninext][njnext].getCellType() == FOOD) return true;
   }
   return false;
 }
@@ -155,24 +157,18 @@ void MapGenerator::swap(int & a, int &b){
 
 void MapGenerator::createCorners(){
   for (int x = 0; x < height; ++x) {
-    halfMap[x][halfWidth - 2].setCellType(CORRIDOR);
     halfMap[x][halfWidth - 1].setCellType(WALL);
   }
   for (int y = 0; y < halfWidth; ++y) {
-    if(y != halfWidth-1){
-      halfMap[1][y].setCellType(CORRIDOR);
-      halfMap[height-2][y].setCellType(CORRIDOR);
-    }
-
     halfMap[0][y].setCellType(WALL);
     halfMap[height-1][y].setCellType(WALL);
   }
 
   for (int x = 0; x < 4; ++x) {
     for (int y = 0; y < 4; ++y){
-      CellType c = CORRIDOR;
+      CellType c = JAIL;
       if(x == 2 || y == 2) c = WALL;
-      if(x == 3 || y == 3) c = CORRIDOR;
+      if(x == 3 || y == 3) c = FOOD;
       halfMap[(int) (height/2) + y][x].setCellType(c);
       halfMap[(int) (height/2) - y][x].setCellType(c);
     }
@@ -188,6 +184,8 @@ void MapGenerator::mapMirroring(){
   }
   for (int x = 1; x < height-1; ++x) {
     // All corridors except the two borders and the position (heigth/2 + 3).
-    if(x != (height/2)+2) finalMap[x][halfWidth].setCellType(CORRIDOR);
+    if(x != (height/2)-2) finalMap[x][halfWidth].setCellType(FOOD);
+    if(abs((height/2) - x) < 2) finalMap[x][halfWidth].setCellType(JAIL);
+    if((x - (height/2)) == 2) finalMap[x][halfWidth].setCellType(JAIL);
   }
 }
