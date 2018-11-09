@@ -14,15 +14,19 @@ Students: Pau Balaguer and Didac Florensa
 Practice 1. Exercise 2
 */
 
-int WIDTH = 700;
-int HEIGHT = 700;
+int WIDTH = 500;
+int HEIGHT = 500;
 int COLUMNS;
 int ROWS;
 Cell** map;
+int sizeCellX;
+int sizeCellY;
 
 //-----------------------------------------------
 
 void displayMap();
+void drawFood();
+float getPosition(int n, float CellSize);
 void windowReshapeFunc( GLint newWidth, GLint newHeight );
 //-----------------------------------------------
 
@@ -96,9 +100,41 @@ void displayMap(){
     }
   }
 
+  drawFood();
+
   glutSwapBuffers();
 }
 
 void windowReshapeFunc( GLint newWidth, GLint newHeight ) {
   glutReshapeWindow(WIDTH, HEIGHT);
+}
+
+void drawFood() {
+  //float xCell = WIDTH / COLUMNS;
+  //float yCell = HEIGHT / ROWS;
+  float CellSizeX = WIDTH / COLUMNS;
+  float CellSizeY = HEIGHT / ROWS;
+  float x, y; //First cell (0,0)
+  Cell cell;
+  for(int i=0; i<COLUMNS; i++) {
+    for(int j=0; j<ROWS; j++){
+      cell = map[j][i];
+      if(cell.getCellType() == CORRIDOR)
+      {
+        x = getPosition(j, CellSizeX);
+        y = getPosition(i, CellSizeY);
+        glColor3f(1,1,1);
+        glBegin(GL_QUADS);
+        glVertex2i(x-3,y-3);
+        glVertex2i(x+3,y-3);
+        glVertex2i(x+3,y+3);
+        glVertex2i(x-3,y+3);
+        glEnd();
+      }
+    }
+  }
+}
+
+float getPosition(int n, float CellSize) {
+  return ((n * CellSize) + (CellSize / 2)) ;
 }
