@@ -1,15 +1,7 @@
-# Prac 1
+# Prac 2
 
 ## Students
 Pau Balaguer and Didac Florensa
-
-## Exercise 1
-
-Run:
-
-`make ex1`
-
-`./generate H W`
 
 ## Exercise 2
 

@@ -8,6 +8,7 @@
 #include <iostream>
 #include "Cell.h"
 #include "MapGenerator.h"
+#include "PacMan.h"
 
 /*
 Students: Pau Balaguer and Didac Florensa
@@ -18,22 +19,12 @@ float WIDTH = 500.0;
 float HEIGHT = 500.0;
 int COLUMNS;
 int ROWS;
-float pixelsPerColmns;
-float pixelsPerRow;
-Cell** map;
-int sizeCellX;
-int sizeCellY;
 
-int playerXPos = 1;
-int playerYPos = 1;
+PacMan* pacMan;
 
 //-----------------------------------------------
 
 void displayMap();
-void drawCorridor(Cell cell, int i, int j);
-void drawFood(Cell cell, int i, int j);
-void checkPlayer(Cell cell, int i, int j);
-float getPosition(int n, float CellSize);
 void windowReshapeFunc( GLint newWidth, GLint newHeight );
 void keyboard(int key, int x, int y);
 
@@ -58,19 +49,13 @@ int main(int argc,char *argv[]){
   ROWS = h;
   COLUMNS = w;
 
-  pixelsPerColmns = WIDTH / COLUMNS;
-  pixelsPerRow = HEIGHT / ROWS;
-
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
   glutInitWindowPosition(50, 50);
   glutInitWindowSize(WIDTH, HEIGHT);
   glutCreateWindow("PACMAN MAP");
 
-  MapGenerator mapGenerator(h, w);
-  map = mapGenerator.generateMap();
-  map[playerXPos][playerYPos].setCellType(PLAYER);
-  mapGenerator.printMap();
+  pacMan = new PacMan(COLUMNS, ROWS, WIDTH, HEIGHT);
 
   glutDisplayFunc(displayMap);
   glutReshapeFunc(windowReshapeFunc);
@@ -95,10 +80,9 @@ void displayMap(){
 
   for(i=0; i<COLUMNS; i++) {
     for(j=0; j<ROWS; j++){
-      cell = map[j][i];
-      drawCorridor(cell, i, j);
-      drawFood(cell, i, j);
-      checkPlayer(cell, i, j);
+      pacMan->drawCorridor(i, j);
+      pacMan->drawFood(i, j);
+      pacMan->checkPlayer(i, j);
     }
   }
   glutSwapBuffers();
@@ -109,71 +93,20 @@ void windowReshapeFunc( GLint newWidth, GLint newHeight ) {
 }
 
 void keyboard(int key, int x, int y){
-  int oldX = playerXPos;
-  int oldY = playerYPos;
-
   switch(key){
     case GLUT_KEY_UP:
-      playerXPos ++;
+      pacMan->playerUP();
       break;
     case GLUT_KEY_DOWN:
-      playerXPos --;
+      pacMan->playerDOWN();
       break;
     case GLUT_KEY_LEFT:
-      playerYPos --;
+    pacMan->playerLEFT();
       break;
     case GLUT_KEY_RIGHT:
-      playerYPos ++;
+    pacMan->playerRIGHT();
       break;
   }
-  map[oldX][oldY].setCellType(CORRIDOR);
-  map[playerXPos][playerYPos].setCellType(PLAYER);
   glutPostRedisplay();
 
 };
-
-void drawCorridor(Cell cell, int i, int j){
-  if(cell.getCellType() != WALL) {
-    glColor3f(0.8,0.8,0.8);
-    glBegin(GL_QUADS);
-    glVertex2i(i*pixelsPerColmns,j*pixelsPerRow);
-    glVertex2i((i+1)*pixelsPerColmns,j*pixelsPerRow);
-    glVertex2i((i+1)*pixelsPerColmns,(j+1)*pixelsPerRow);
-    glVertex2i(i*pixelsPerColmns,(j+1)*pixelsPerRow);
-    glEnd();
-  }
-}
-
-void drawFood(Cell cell, int i, int j) {
-  float x, y;
-  if(cell.getCellType() == FOOD){
-    x = getPosition(i, pixelsPerColmns);
-    y = getPosition(j, pixelsPerRow);
-    glColor3f(1,1,1);
-    glBegin(GL_QUADS);
-    glVertex2i(x-3,y-3);
-    glVertex2i(x+3,y-3);
-    glVertex2i(x+3,y+3);
-    glVertex2i(x-3,y+3);
-    glEnd();
-  }
-}
-
-void checkPlayer(Cell cell, int i, int j) {
-  float x, y;
-  if(cell.getCellType() == PLAYER){
-    x = getPosition(i, pixelsPerColmns);
-    y = getPosition(j, pixelsPerRow);
-    glColor3f(1,1,0);
-    glBegin(GL_QUADS);
-    glVertex2i(x-4,y-4);
-    glVertex2i(x+4,y-4);
-    glVertex2i(x+4,y+4);
-    glVertex2i(x-4,y+4);
-    glEnd();
-  }
-}
-
-float getPosition(int n, float pixels) {
-  return ((n * pixels) + (pixels / 2)) ;
-}
