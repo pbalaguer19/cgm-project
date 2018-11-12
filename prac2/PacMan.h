@@ -40,6 +40,13 @@ private:
     map[playerXPos][playerYPos].setCellType(PLAYER);
   }
 
+  bool checkWall(int x, int y) {
+    Cell cell = map[x][y];
+    if(cell.getCellType() == WALL)
+      return true;
+    else return false;
+  }
+
 public:
   PacMan(int c, int r, float w, float h){
     mapGenerator = new MapGenerator(c, r);
@@ -103,19 +110,22 @@ public:
   }
 
   void playerUP(){
-    setPlayerPosition(playerXPos++, playerYPos);
+    if(!checkWall(playerXPos, playerYPos+1))
+      setPlayerPosition(playerXPos, playerYPos++);
   }
 
   void playerDOWN(){
-    setPlayerPosition(playerXPos--, playerYPos);
+    if(!checkWall(playerXPos, playerYPos-1))
+      setPlayerPosition(playerXPos, playerYPos--);
   }
 
   void playerLEFT(){
-    setPlayerPosition(playerXPos, playerYPos--);
+    if(!checkWall(playerXPos-1, playerYPos))
+      setPlayerPosition(playerXPos--, playerYPos);
   }
 
   void playerRIGHT(){
-    setPlayerPosition(playerXPos, playerYPos++);
+    if(!checkWall(playerXPos+1, playerYPos))
+      setPlayerPosition(playerXPos++, playerYPos);
   }
-
 };
