@@ -83,6 +83,7 @@ void displayMap(){
       pacMan->drawCorridor(i, j);
       pacMan->drawFood(i, j);
       pacMan->checkPlayer(i, j);
+      pacMan->drawGhosts(i, j);
     }
   }
   glutSwapBuffers();

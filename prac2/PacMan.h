@@ -93,6 +93,24 @@ public:
     }
   }
 
+  void drawGhosts(int i, int j) {
+    float x, y;
+    Cell cell = map[i][j];
+    if(cell.getCellType() == JAIL){
+      cell.setCellType(GHOST);
+      x = getPosition(i, PIXELS_PER_COLUMN);
+      y = getPosition(j, PIXELS_PER_ROW);
+      glColor3f(0,0,0);
+      glBegin(GL_QUADS);
+      glVertex2i(x-4,y-4);
+      glVertex2i(x+4,y-4);
+      glVertex2i(x+4,y+4);
+      glVertex2i(x-4,y+4);
+      glEnd();
+    }
+
+  }
+
   void checkPlayer(int i, int j) {
     float x, y;
     Cell cell = map[i][j];
