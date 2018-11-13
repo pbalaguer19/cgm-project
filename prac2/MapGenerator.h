@@ -158,10 +158,13 @@ void MapGenerator::swap(int & a, int &b){
 void MapGenerator::createCorners(){
   for (int x = 0; x < height; ++x) {
     halfMap[x][halfWidth - 1].setCellType(WALL);
+    halfMap[x][halfWidth - 2].setCellType(FOOD);
   }
-  for (int y = 0; y < halfWidth; ++y) {
+  for (int y = 0; y < halfWidth-1; ++y) {
     halfMap[0][y].setCellType(WALL);
     halfMap[height-1][y].setCellType(WALL);
+    halfMap[1][y].setCellType(FOOD);
+    halfMap[height-2][y].setCellType(FOOD);
   }
 
   for (int x = 0; x < 4; ++x) {

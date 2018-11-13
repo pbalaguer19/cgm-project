@@ -5,10 +5,12 @@ private:
   int x;
   int y;
   CellType type;
+  CellType previousType;
 public:
   Cell();
   Cell(int x_pos, int y_pos, CellType cellType);
   CellType getCellType();
+  CellType getPreviousCellType();
   void setCellType(CellType type);
   void setX(int x);
   int getX();
@@ -21,13 +23,19 @@ Cell::Cell(int x_pos, int y_pos, CellType cellType){
   x = x_pos;
   y = y_pos;
   type = cellType;
+  previousType = type;
 }
 
 CellType Cell::getCellType(){
   return type;
 }
 
+CellType Cell::getPreviousCellType(){
+  return previousType;
+}
+
 void Cell::setCellType(CellType cellType){
+  previousType = type;
   type = cellType;
 }
 

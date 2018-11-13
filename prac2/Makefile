@@ -3,3 +3,6 @@ pacman:
 
 clear:
 	rm pacman
+
+all:
+	make clear; make

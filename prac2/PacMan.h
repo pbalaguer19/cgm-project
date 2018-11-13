@@ -1,12 +1,23 @@
 #include <iostream>
 #include "ctime"
 
+#define DURATION 200
+
+#define MOVE 1
+#define QUIET 2
+
+
 class PacMan{
 private:
   Cell** map;
   MapGenerator* mapGenerator;
   int playerXPos;
   int playerYPos;
+  particle player;
+
+  int ghostsXPos[4];
+  int ghostsYPos[4];
+  particle ghosts[4];
 
   int COLUMNS;
   int ROWS;
@@ -16,13 +27,32 @@ private:
   float PIXELS_PER_ROW;
 
   void definePlayerPosition(){
-    for(playerXPos = 1; playerXPos < ROWS; playerXPos++){
-      for(playerYPos = 1; playerYPos < COLUMNS; playerYPos++){
-        if(map[playerXPos][playerYPos].getCellType() == FOOD){
-          map[playerXPos][playerYPos].setCellType(PLAYER);
+    for(playerXPos = 1; playerXPos < COLUMNS; playerXPos++){
+      for(playerYPos = 1; playerYPos < ROWS; playerYPos++){
+        if(map[playerYPos][playerXPos].getCellType() == FOOD){
+          map[playerYPos][playerXPos].setCellType(PLAYER);
           return;
         }
       }
+    }
+  }
+
+  void defineGhostsPositions(){
+    ghostsXPos[0] = COLUMNS / 2;
+    ghostsYPos[0] = ROWS / 2;
+
+    ghostsXPos[1] = (COLUMNS / 2) + 1;
+    ghostsYPos[1] = ROWS / 2;
+
+    ghostsXPos[2] = COLUMNS / 2;
+    ghostsYPos[2] = (ROWS / 2) + 1;
+
+    ghostsXPos[3] = (COLUMNS / 2) + 1;
+    ghostsYPos[3] = (ROWS / 2) + 1;
+
+    for(int i = 0; i < 4; i++){
+        map[ghostsYPos[i]][ghostsXPos[i]].setCellType(GHOST);
+        ghosts[i].set_position(getPosition(ghostsXPos[i], PIXELS_PER_COLUMN), getPosition(ghostsYPos[i], PIXELS_PER_ROW));
     }
   }
 
@@ -31,18 +61,23 @@ private:
   }
 
   void setPlayerPosition(int newX, int newY){
-    int oldX = playerXPos;
-    int oldY = playerYPos;
+    if(isWall(newX, newY)) return;
+
+    int oldXPos = playerXPos;
+    int oldYPos = playerYPos;
+
     playerXPos = newX;
     playerYPos = newY;
 
-    map[oldX][oldY].setCellType(CORRIDOR);
-    map[playerXPos][playerYPos].setCellType(PLAYER);
+    player.init_movement(getPosition(playerXPos, PIXELS_PER_COLUMN), getPosition(playerYPos, PIXELS_PER_ROW), DURATION);
+
+    map[newY][newX].setCellType(PLAYER);
+    map[oldYPos][oldXPos].setCellType(CORRIDOR);
   }
 
-  bool checkWall(int x, int y) {
-    Cell cell = map[x][y];
-    if(cell.getCellType() == WALL)
+  bool isWall(int x, int y) {
+    Cell cell = map[y][x];
+    if(cell.getCellType() == WALL || cell.getCellType() == JAIL || cell.getCellType() == GHOST)
       return true;
     else return false;
   }
@@ -53,19 +88,22 @@ public:
     map = mapGenerator->generateMap();
     mapGenerator->printMap();
 
-    ROWS = mapGenerator->getHeight();
-    COLUMNS = mapGenerator->getWidth();
+    COLUMNS = mapGenerator->getHeight();
+    ROWS = mapGenerator->getWidth();
     WIDTH = w;
     HEIGHT = h;
 
-    PIXELS_PER_COLUMN = WIDTH / COLUMNS;
-    PIXELS_PER_ROW = HEIGHT / ROWS;
+    std::cout << COLUMNS << '\n';
+    std::cout << ROWS << '\n';
 
     definePlayerPosition();
+    defineGhostsPositions();
+
+    player.set_position(getPosition(playerXPos, PIXELS_PER_COLUMN), getPosition(playerYPos, PIXELS_PER_ROW));
   }
 
   void drawCorridor(int i, int j){
-    Cell cell = map[i][j];
+    Cell cell = map[j][i];
     if(cell.getCellType() != WALL) {
       glColor3f(0.8,0.8,0.8);
       glBegin(GL_QUADS);
@@ -79,7 +117,7 @@ public:
 
   void drawFood(int i, int j) {
     float x, y;
-    Cell cell = map[i][j];
+    Cell cell = map[j][i];
     if(cell.getCellType() == FOOD){
       x = getPosition(i, PIXELS_PER_COLUMN);
       y = getPosition(j, PIXELS_PER_ROW);
@@ -93,57 +131,56 @@ public:
     }
   }
 
-  void drawGhosts(int i, int j) {
-    float x, y;
-    Cell cell = map[i][j];
-    if(cell.getCellType() == JAIL){
-      cell.setCellType(GHOST);
-      x = getPosition(i, PIXELS_PER_COLUMN);
-      y = getPosition(j, PIXELS_PER_ROW);
-      glColor3f(0,0,0);
-      glBegin(GL_QUADS);
-      glVertex2i(x-4,y-4);
-      glVertex2i(x+4,y-4);
-      glVertex2i(x+4,y+4);
-      glVertex2i(x-4,y+4);
-      glEnd();
+  void drawGhosts() {
+    for(int i = 0; i < 4; i++){
+      ghosts[i].draw(false);
     }
-
   }
 
-  void checkPlayer(int i, int j) {
-    float x, y;
-    Cell cell = map[i][j];
-    if(cell.getCellType() == PLAYER){
-      x = getPosition(i, PIXELS_PER_COLUMN);
-      y = getPosition(j, PIXELS_PER_ROW);
-      glColor3f(1,1,0);
-      glBegin(GL_QUADS);
-      glVertex2i(x-4,y-4);
-      glVertex2i(x+4,y-4);
-      glVertex2i(x+4,y+4);
-      glVertex2i(x-4,y+4);
-      glEnd();
-    }
+  void drawPlayer() {
+    player.draw(true);
   }
 
   void playerUP(){
-    if(!checkWall(playerXPos, playerYPos+1))
-      setPlayerPosition(playerXPos, playerYPos++);
+    setPlayerPosition(playerXPos, playerYPos+1);
   }
 
   void playerDOWN(){
-    if(!checkWall(playerXPos, playerYPos-1))
-      setPlayerPosition(playerXPos, playerYPos--);
+    setPlayerPosition(playerXPos, playerYPos-1);
   }
 
   void playerLEFT(){
-    if(!checkWall(playerXPos-1, playerYPos))
-      setPlayerPosition(playerXPos--, playerYPos);
+    setPlayerPosition(playerXPos-1, playerYPos);
   }
 
   void playerRIGHT(){
-    if(!checkWall(playerXPos+1, playerYPos))
-      setPlayerPosition(playerXPos++, playerYPos);
+    setPlayerPosition(playerXPos+1, playerYPos);
+  }
+
+  void integrate(long t){
+    int direct[][2] = {{0,1}, {0,-1}, {-1,0}, {1,0}};
+
+    player.integrate(t);
+    for(int i = 0; i < 4; i++){
+      if(ghosts[i].isReady()){
+        int pos;
+        int ni, nj;
+
+        do{
+          pos = rand() % 4;
+          ni = ghostsXPos[i] + direct[pos][0];
+          nj = ghostsYPos[i] + direct[pos][1];
+        }while(map[nj][ni].getCellType() == WALL);
+
+        CellType cellType = map[ghostsYPos[i]][ghostsXPos[i]].getPreviousCellType();
+        map[nj][ni].setCellType(GHOST);
+        map[ghostsYPos[i]][ghostsXPos[i]].setCellType(cellType);
+        ghostsXPos[i] = ni;
+        ghostsYPos[i] = nj;
+        ghosts[i].init_movement(getPosition(ni, PIXELS_PER_COLUMN), getPosition(nj, PIXELS_PER_ROW), DURATION);
+      }
+
+      ghosts[i].integrate(t);
+    }
   }
 };
