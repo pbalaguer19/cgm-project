@@ -39,16 +39,19 @@ void idle();
 
 int main(int argc,char *argv[]){
 
-  if(argc < 3){
-      std::cout << "./generate HEIGHT WIDTH" << "\n\n";
+  if(argc < 4){
+      std::cout << "./generate HEIGHT WIDTH GHOSTS" << "\n\n";
       std::cout << "MapGenerator rules:" << '\n';
       std::cout << " - Height >= 11. Always an even number" << '\n';
       std::cout << " - Width >= 9." << '\n';
+      std::cout << " - 0 < Ghosts < 16." << '\n';
       return 0;
   }
 
   int h = atoi(argv[1]);
   int w = atoi(argv[2]);
+  int ghostsNumber = atoi(argv[3]);
+
   ROWS = h;
   COLUMNS = w;
 
@@ -58,7 +61,7 @@ int main(int argc,char *argv[]){
   glutInitWindowSize(WIDTH, HEIGHT);
   glutCreateWindow("PACMAN MAP");
 
-  pacMan = new PacMan(COLUMNS, ROWS, WIDTH, HEIGHT);
+  pacMan = new PacMan(COLUMNS, ROWS, WIDTH, HEIGHT, ghostsNumber);
 
   glutDisplayFunc(displayMap);
   glutReshapeFunc(windowReshapeFunc);

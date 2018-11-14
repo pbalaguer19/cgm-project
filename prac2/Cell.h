@@ -35,7 +35,7 @@ CellType Cell::getPreviousCellType(){
 }
 
 void Cell::setCellType(CellType cellType){
-  previousType = type;
+  if(cellType != type) previousType = type;
   type = cellType;
 }
 

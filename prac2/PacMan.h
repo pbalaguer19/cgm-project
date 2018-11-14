@@ -15,9 +15,9 @@ private:
   int playerYPos;
   particle player;
 
-  int ghostsXPos[4];
-  int ghostsYPos[4];
-  particle ghosts[4];
+  int *ghostsXPos;
+  int *ghostsYPos;
+  particle *ghosts;
 
   int COLUMNS;
   int ROWS;
@@ -26,7 +26,13 @@ private:
   float PIXELS_PER_COLUMN;
   float PIXELS_PER_ROW;
 
+  int GHOSTS;
+
   void definePlayerPosition(){
+    ghostsXPos = new int[GHOSTS];
+    ghostsYPos = new int[GHOSTS];
+    ghosts = new particle[GHOSTS];
+
     for(playerXPos = 1; playerXPos < COLUMNS; playerXPos++){
       for(playerYPos = 1; playerYPos < ROWS; playerYPos++){
         if(map[playerYPos][playerXPos].getCellType() == FOOD){
@@ -38,21 +44,20 @@ private:
   }
 
   void defineGhostsPositions(){
-    ghostsXPos[0] = COLUMNS / 2;
-    ghostsYPos[0] = ROWS / 2;
+    int c = -2;
+    int r = -1;
 
-    ghostsXPos[1] = (COLUMNS / 2) + 1;
-    ghostsYPos[1] = ROWS / 2;
+    for(int i = 0; i < GHOSTS; i++){
+      ghostsXPos[i] = COLUMNS / 2 + c;
+      ghostsYPos[i] = ROWS / 2 + r;
+      r += 1;
+      if(r >= 2){
+        r = -1;
+        c++;
+      }
 
-    ghostsXPos[2] = COLUMNS / 2;
-    ghostsYPos[2] = (ROWS / 2) + 1;
-
-    ghostsXPos[3] = (COLUMNS / 2) + 1;
-    ghostsYPos[3] = (ROWS / 2) + 1;
-
-    for(int i = 0; i < 4; i++){
-        map[ghostsYPos[i]][ghostsXPos[i]].setCellType(GHOST);
-        ghosts[i].set_position(getPosition(ghostsXPos[i], PIXELS_PER_COLUMN), getPosition(ghostsYPos[i], PIXELS_PER_ROW));
+      map[ghostsYPos[i]][ghostsXPos[i]].setCellType(GHOST);
+      ghosts[i].set_position(getPosition(ghostsXPos[i], PIXELS_PER_COLUMN), getPosition(ghostsYPos[i], PIXELS_PER_ROW));
     }
   }
 
@@ -83,18 +88,22 @@ private:
   }
 
 public:
-  PacMan(int c, int r, float w, float h){
-    mapGenerator = new MapGenerator(c, r);
+  PacMan(int c, int r, float w, float h, int ghostsNumber){
+    mapGenerator = new MapGenerator(r, c);
     map = mapGenerator->generateMap();
     mapGenerator->printMap();
 
-    COLUMNS = mapGenerator->getHeight();
-    ROWS = mapGenerator->getWidth();
+    ROWS = mapGenerator->getHeight();
+    COLUMNS = mapGenerator->getWidth();
     WIDTH = w;
     HEIGHT = h;
 
-    std::cout << COLUMNS << '\n';
-    std::cout << ROWS << '\n';
+    GHOSTS = ghostsNumber;
+    if(ghostsNumber < 1) GHOSTS = 1;
+    if(ghostsNumber > 16) GHOSTS = 15;
+
+    PIXELS_PER_COLUMN = WIDTH / COLUMNS;
+    PIXELS_PER_ROW = HEIGHT / ROWS;
 
     definePlayerPosition();
     defineGhostsPositions();
@@ -132,7 +141,7 @@ public:
   }
 
   void drawGhosts() {
-    for(int i = 0; i < 4; i++){
+    for(int i = 0; i < GHOSTS; i++){
       ghosts[i].draw(false);
     }
   }
@@ -161,7 +170,7 @@ public:
     int direct[][2] = {{0,1}, {0,-1}, {-1,0}, {1,0}};
 
     player.integrate(t);
-    for(int i = 0; i < 4; i++){
+    for(int i = 0; i < GHOSTS; i++){
       if(ghosts[i].isReady()){
         int pos;
         int ni, nj;
