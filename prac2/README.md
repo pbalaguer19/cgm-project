@@ -7,9 +7,9 @@ Pau Balaguer and Didac Florensa
 
 Run:
 
-`make ex2` or `make ex2mac` (if you are running it in a OSX computer.)
+`make pacman` or `make all`
 
-`./drawMap H W`
+`./drawMap HEIGHT WIDTH GHOSTS`
 
 ## Other
 
