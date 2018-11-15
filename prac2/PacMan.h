@@ -87,6 +87,32 @@ private:
     else return false;
   }
 
+  void setGhostsPositions(long t){
+    int direct[][2] = {{0,1}, {0,-1}, {-1,0}, {1,0}};
+
+    for(int i = 0; i < GHOSTS; i++){
+      if(ghosts[i].isReady()){
+        int pos;
+        int ni, nj;
+
+        do{
+          pos = rand() % 4;
+          ni = ghostsXPos[i] + direct[pos][0];
+          nj = ghostsYPos[i] + direct[pos][1];
+        }while(map[nj][ni].getCellType() == WALL);
+
+        CellType cellType = map[ghostsYPos[i]][ghostsXPos[i]].getPreviousCellType();
+        map[nj][ni].setCellType(GHOST);
+        map[ghostsYPos[i]][ghostsXPos[i]].setCellType(cellType);
+        ghostsXPos[i] = ni;
+        ghostsYPos[i] = nj;
+        ghosts[i].init_movement(getPosition(ni, PIXELS_PER_COLUMN), getPosition(nj, PIXELS_PER_ROW), DURATION);
+      }
+
+      ghosts[i].integrate(t);
+    }
+  }
+
 public:
   PacMan(int c, int r, float w, float h, int ghostsNumber){
     mapGenerator = new MapGenerator(r, c);
@@ -167,29 +193,7 @@ public:
   }
 
   void integrate(long t){
-    int direct[][2] = {{0,1}, {0,-1}, {-1,0}, {1,0}};
-
     player.integrate(t);
-    for(int i = 0; i < GHOSTS; i++){
-      if(ghosts[i].isReady()){
-        int pos;
-        int ni, nj;
-
-        do{
-          pos = rand() % 4;
-          ni = ghostsXPos[i] + direct[pos][0];
-          nj = ghostsYPos[i] + direct[pos][1];
-        }while(map[nj][ni].getCellType() == WALL);
-
-        CellType cellType = map[ghostsYPos[i]][ghostsXPos[i]].getPreviousCellType();
-        map[nj][ni].setCellType(GHOST);
-        map[ghostsYPos[i]][ghostsXPos[i]].setCellType(cellType);
-        ghostsXPos[i] = ni;
-        ghostsYPos[i] = nj;
-        ghosts[i].init_movement(getPosition(ni, PIXELS_PER_COLUMN), getPosition(nj, PIXELS_PER_ROW), DURATION);
-      }
-
-      ghosts[i].integrate(t);
-    }
+    setGhostsPositions(t);
   }
 };
