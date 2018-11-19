@@ -6,6 +6,10 @@
 #define MOVE 1
 #define QUIET 2
 
+#define Y 10
+#define PLAYER_RADIUS 8
+#define FOOD_RADIUS 3
+#define GHOST_RADIUS 5
 
 class PacMan{
 private:
@@ -25,6 +29,9 @@ private:
   float HEIGHT;
   float PIXELS_PER_COLUMN;
   float PIXELS_PER_ROW;
+
+  float HEIGHT_DISPLACEMENT;
+  float WIDTH_DISPLACEMENT;
 
   int GHOSTS;
 
@@ -62,7 +69,7 @@ private:
   }
 
   float getPosition(int n, float pixels) {
-    return ((n * pixels) + (pixels / 2)) ;
+    return (n * pixels) ;
   }
 
   void setPlayerPosition(int newX, int newY){
@@ -73,7 +80,6 @@ private:
 
     playerXPos = newX;
     playerYPos = newY;
-
     player.init_movement(getPosition(playerXPos, PIXELS_PER_COLUMN), getPosition(playerYPos, PIXELS_PER_ROW), DURATION);
 
     map[newY][newX].setCellType(PLAYER);
@@ -82,7 +88,7 @@ private:
 
   bool isWall(int x, int y) {
     Cell cell = map[y][x];
-    if(cell.getCellType() == WALL || cell.getCellType() == JAIL || cell.getCellType() == GHOST)
+    if(cell.getCellType() == WALL || cell.getCellType() == JAIL)
       return true;
     else return false;
   }
@@ -113,6 +119,21 @@ private:
     }
   }
 
+  void drawSphere(int radius, int x, int z, float r, float g, float b){
+    float baseX = WIDTH_DISPLACEMENT + (PIXELS_PER_COLUMN / 2);
+    float baseY = radius;
+    float baseZ = HEIGHT_DISPLACEMENT - (PIXELS_PER_ROW / 2);
+
+    glPushMatrix();
+    glColor3f(r, g, b);
+    GLUquadric *quad;
+    quad = gluNewQuadric();
+    glTranslatef(baseX + x*PIXELS_PER_COLUMN, baseY, baseZ - z*PIXELS_PER_ROW);
+    gluSphere(quad,radius,100,20);
+    glEnd();
+    glPopMatrix();
+  }
+
 public:
   PacMan(int c, int r, float w, float h, int ghostsNumber){
     mapGenerator = new MapGenerator(r, c);
@@ -131,6 +152,9 @@ public:
     PIXELS_PER_COLUMN = WIDTH / COLUMNS;
     PIXELS_PER_ROW = HEIGHT / ROWS;
 
+    HEIGHT_DISPLACEMENT = (HEIGHT / 2);
+    WIDTH_DISPLACEMENT = - (WIDTH / 2);
+
     definePlayerPosition();
     defineGhostsPositions();
 
@@ -139,13 +163,49 @@ public:
 
   void drawCorridor(int i, int j){
     Cell cell = map[j][i];
-    if(cell.getCellType() != WALL) {
-      glColor3f(0.8,0.8,0.8);
+    if(cell.getCellType() == WALL) {
+      float x = (i * PIXELS_PER_COLUMN) + WIDTH_DISPLACEMENT;
+      float y = 0.0;
+      float z = HEIGHT_DISPLACEMENT - (j * PIXELS_PER_ROW);
+
+      glColor3f(0.0, 0.0, 1.0);
       glBegin(GL_QUADS);
-      glVertex2i(i*PIXELS_PER_COLUMN,j*PIXELS_PER_ROW);
-      glVertex2i((i+1)*PIXELS_PER_COLUMN,j*PIXELS_PER_ROW);
-      glVertex2i((i+1)*PIXELS_PER_COLUMN,(j+1)*PIXELS_PER_ROW);
-      glVertex2i(i*PIXELS_PER_COLUMN,(j+1)*PIXELS_PER_ROW);
+      glVertex3i(x,y,z);
+      glVertex3i(x,y+Y,z);
+      glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z);
+      glVertex3i(x+PIXELS_PER_COLUMN,y,z);
+      glEnd();
+
+      glColor3f(0.0, 1.0, 0);
+      glBegin(GL_QUADS);
+      glVertex3i(x+PIXELS_PER_COLUMN,y,z);
+      glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z);
+      glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z-PIXELS_PER_ROW);
+      glVertex3i(x+PIXELS_PER_COLUMN,y,z-PIXELS_PER_ROW);
+      glEnd();
+
+      glColor3f(1.0, 0, 0);
+      glBegin(GL_QUADS);
+      glVertex3i(x,y,z);
+      glVertex3i(x,y+Y,z);
+      glVertex3i(x,y+Y,z-PIXELS_PER_ROW);
+      glVertex3i(x,y,z-PIXELS_PER_ROW);
+      glEnd();
+
+      glColor3f(1.0, 0, 1.0);
+      glBegin(GL_QUADS);
+      glVertex3i(x,y,z-PIXELS_PER_ROW);
+      glVertex3i(x,y+Y,z-PIXELS_PER_ROW);
+      glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z-PIXELS_PER_ROW);
+      glVertex3i(x+PIXELS_PER_COLUMN,y,z-PIXELS_PER_ROW);
+      glEnd();
+
+      glColor3f(0, 0, 0);
+      glBegin(GL_QUADS);
+      glVertex3i(x,y+Y,z);
+      glVertex3i(x,y+Y,z-PIXELS_PER_ROW);
+      glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z-PIXELS_PER_ROW);
+      glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z);
       glEnd();
     }
   }
@@ -154,26 +214,24 @@ public:
     float x, y;
     Cell cell = map[j][i];
     if(cell.getCellType() == FOOD){
-      x = getPosition(i, PIXELS_PER_COLUMN);
-      y = getPosition(j, PIXELS_PER_ROW);
-      glColor3f(1,1,1);
-      glBegin(GL_QUADS);
-      glVertex2i(x-3,y-3);
-      glVertex2i(x+3,y-3);
-      glVertex2i(x+3,y+3);
-      glVertex2i(x-3,y+3);
-      glEnd();
+      drawSphere(FOOD_RADIUS, i, j, 0.5, 1, 0.5);
     }
   }
 
   void drawGhosts() {
+    float baseX = WIDTH_DISPLACEMENT + (PIXELS_PER_COLUMN / 2);
+    float baseZ = HEIGHT_DISPLACEMENT - (PIXELS_PER_ROW / 2);
+
     for(int i = 0; i < GHOSTS; i++){
-      ghosts[i].draw(false);
+     ghosts[i].draw(GHOST_RADIUS, 0.5, 0.2, 1.0, baseX, baseZ);
     }
   }
 
   void drawPlayer() {
-    player.draw(true);
+    float baseX = WIDTH_DISPLACEMENT + (PIXELS_PER_COLUMN / 2);
+    float baseZ = HEIGHT_DISPLACEMENT - (PIXELS_PER_ROW / 2);
+
+    player.draw(PLAYER_RADIUS, 1.0, 1.0, 0, baseX, baseZ);
   }
 
   void playerUP(){

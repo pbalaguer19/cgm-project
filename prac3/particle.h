@@ -23,7 +23,7 @@ public:
   void set_position(int x,int y);
   void init_movement(int destination_x,int destination_y,int duration);
   void integrate(long t);
-  void draw(bool isPlayer);
+  void draw(int radius, float r, float g, float b, float bx, float bz);
   bool isReady();
 };
 
@@ -74,16 +74,15 @@ void particle::integrate(long t)
 
 //-----------------------------------------------
 
-void particle::draw(bool isPlayer)
-{
-  if(isPlayer) glColor3f(1,1,0);
-  else glColor3f(0,0,0);
-  glBegin(GL_QUADS);
-  glVertex2i(x-4,y-4);
-  glVertex2i(x+4,y-4);
-  glVertex2i(x+4,y+4);
-  glVertex2i(x-4,y+4);
+void particle::draw(int radius, float r, float g, float b, float baseX, float baseZ){
+  glPushMatrix();
+  glColor3f(r, g, b);
+  GLUquadric *quad;
+  quad = gluNewQuadric();
+  glTranslatef(baseX + x, radius, baseZ - y);
+  gluSphere(quad,radius,100,20);
   glEnd();
+  glPopMatrix();
 }
 
 bool particle::isReady(){
