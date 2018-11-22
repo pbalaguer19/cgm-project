@@ -9,7 +9,7 @@
 #include "Cell.h"
 #include "MapGenerator.h"
 #include "particle.h"
-#include "PacMan.h"
+#include "PacManTextures.h"
 #include "jpeglib.h"
 
 #define WINDOW_WIDTH 1000
@@ -30,7 +30,7 @@ float HEIGHT = 500.0;
 int COLUMNS;
 int ROWS;
 
-PacMan* pacMan;
+PacManTextures* pacManTextures;
 long last_t=0;
 
 //-----------------------------------------------
@@ -43,6 +43,7 @@ void idle();
 void PositionObserver(float alpha,float beta,int radi);
 void ReadJPEG(char *filename,unsigned char **image,int *width, int *height);
 void LoadTexture(char *filename,int dim);
+
 void drawTexture();
 //-----------------------------------------------
 
@@ -77,10 +78,10 @@ int main(int argc,char *argv[]){
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   glutCreateWindow("PACMAN MAP");
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_TEXTURE_2D);
 
 
-  pacMan = new PacMan(COLUMNS, ROWS, WIDTH, HEIGHT, ghostsNumber);
+
+  pacManTextures = new PacManTextures(COLUMNS, ROWS, WIDTH, HEIGHT, ghostsNumber);
 
   glutDisplayFunc(displayMap);
   glutReshapeFunc(windowReshapeFunc);
@@ -89,6 +90,8 @@ int main(int argc,char *argv[]){
   glutIdleFunc(idle);
   glBindTexture(GL_TEXTURE_2D,0);
   LoadTexture("cesped.jpg",64);
+  glBindTexture(GL_TEXTURE_2D,1);
+  LoadTexture("pared.jpg",64);
 
   glutMainLoop();
   return 0;
@@ -120,25 +123,28 @@ void displayMap(){
   glPolygonMode(GL_FRONT,GL_FILL);
   glPolygonMode(GL_BACK,GL_FILL);
 
+
   for(i=0; i<COLUMNS; i++) {
     for(j=0; j<ROWS; j++){
-      pacMan->drawCorridor(i, j);
-      pacMan->drawFood(i, j);
+      pacManTextures->drawCorridor(i, j);
+      pacManTextures->drawFood(i, j);
     }
   }
 
-  pacMan->drawGhosts();
-  pacMan->drawPlayer();
+  pacManTextures->drawGhosts();
+  pacManTextures->drawPlayer();
+
 
   // Floor
+  glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D,0);
   glBegin(GL_QUADS);
-  glTexCoord2f(-2.0,0.0); glVertex3i(WIDTH/2,0,HEIGHT/2);
-  glTexCoord2f(2.0,0.0); glVertex3i(-WIDTH/2,0,HEIGHT/2);
-  glTexCoord2f(2.0,4.0); glVertex3i(-WIDTH/2,0,-HEIGHT/2);
-  glTexCoord2f(-2.0,4.0); glVertex3i(WIDTH/2,0,-HEIGHT/2);
+  glTexCoord2f(0,0); glVertex3i(WIDTH/2,0,HEIGHT/2);
+  glTexCoord2f(COLUMNS,0); glVertex3i(-WIDTH/2,0,HEIGHT/2);
+  glTexCoord2f(COLUMNS,ROWS); glVertex3i(-WIDTH/2,0,-HEIGHT/2);
+  glTexCoord2f(0,ROWS); glVertex3i(WIDTH/2,0,-HEIGHT/2);
   glEnd();
-
+  glDisable(GL_TEXTURE_2D);
   glutSwapBuffers();
 }
 
@@ -149,16 +155,16 @@ void windowReshapeFunc( GLint newWidth, GLint newHeight ) {
 void specialKeyboard(int key, int x, int y){
   switch(key){
     case GLUT_KEY_UP:
-      pacMan->playerUP();
+      pacManTextures->playerUP();
       break;
     case GLUT_KEY_DOWN:
-      pacMan->playerDOWN();
+      pacManTextures->playerDOWN();
       break;
     case GLUT_KEY_LEFT:
-      pacMan->playerLEFT();
+      pacManTextures->playerLEFT();
       break;
     case GLUT_KEY_RIGHT:
-      pacMan->playerRIGHT();
+      pacManTextures->playerRIGHT();
       break;
   }
 };
@@ -186,7 +192,7 @@ void idle(){
     last_t = t;
   }
   else{
-      pacMan->integrate(t-last_t);
+      pacManTextures->integrate(t-last_t);
       last_t = t;
     }
   glutPostRedisplay();

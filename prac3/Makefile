@@ -5,6 +5,7 @@ pacman:
 	g++ pacman.cpp -o pacman -lglut -lGLU -lGL -lm
 
 pacmanTextures:
+
 	g++ pacman_textures.cpp -o pacmanTextures -lglut -lGLU -lGL -lm -ljpeg
 
 clear:
