@@ -74,6 +74,7 @@ int main(int argc,char *argv[]){
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   glutCreateWindow("PACMAN MAP");
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHTING);
 
   pacMan = new PacMan(COLUMNS, ROWS, WIDTH, HEIGHT, ghostsNumber);
 
@@ -91,6 +92,9 @@ int main(int argc,char *argv[]){
 
 //------------------------------------------------------------
 void displayMap(){
+  GLint position[4];
+  GLfloat color[4];
+  GLfloat material[4];
   int i,j;
   Cell cell;
 
@@ -111,6 +115,18 @@ void displayMap(){
   glPolygonMode(GL_FRONT,GL_FILL);
   glPolygonMode(GL_BACK,GL_FILL);
 
+  //-- Ambient light
+
+  position[0]=0; position[1]=1; position[2]=0; position[3]=0;
+  glLightiv(GL_LIGHT0,GL_POSITION,position);
+
+  color[0]=0; color[1]=0; color[2]=0; color[3]=1;
+  glLightfv(GL_LIGHT0,GL_AMBIENT,color);
+  glEnable(GL_LIGHT0);
+
+  material[0]=1.0; material[1]=0.0; material[2]=0.0; material[3]=1.0;
+  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
+
   for(i=0; i<COLUMNS; i++) {
     for(j=0; j<ROWS; j++){
       pacMan->drawCorridor(i, j);
@@ -122,7 +138,9 @@ void displayMap(){
   pacMan->drawPlayer();
 
   // Floor
-  glColor3f(0.5, 0.5, 0.5);
+  material[0]=0.5; material[1]=0.5; material[2]=0.5; material[3]=1.0;
+  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
+
   glBegin(GL_QUADS);
   glVertex3i(WIDTH/2,0,HEIGHT/2);
   glVertex3i(-WIDTH/2,0,HEIGHT/2);

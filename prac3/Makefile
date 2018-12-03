@@ -5,8 +5,11 @@ pacman:
 	g++ pacman.cpp -o pacman -lglut -lGLU -lGL -lm
 
 pacmanTextures:
-
 	g++ pacman_textures.cpp -o pacmanTextures -lglut -lGLU -lGL -lm -ljpeg
+
+pacmanTexturesMac:
+	g++ pacman_textures.cpp -o pacmanTextures -ljpeg -framework OpenGL -framework GLUT -framework Cocoa -lm -std=c++0x -Wno-deprecated-declarations 
+
 
 clear:
 	rm pacman

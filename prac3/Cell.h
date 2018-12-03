@@ -1,4 +1,5 @@
 enum CellType{WALL, CORRIDOR, FOOD, JAIL, GHOST, PLAYER};
+enum CellDirection{UP, DOWN, RIGHT, LEFT};
 
 class Cell{
 private:
@@ -6,6 +7,7 @@ private:
   int y;
   CellType type;
   CellType previousType;
+  CellDirection cellDirection;
 public:
   Cell();
   Cell(int x_pos, int y_pos, CellType cellType);
@@ -16,6 +18,8 @@ public:
   int getX();
   void setY(int y);
   int getY();
+  CellDirection getCellDirection();
+  void setCellDirection(CellDirection c);
 };
 
 Cell::Cell(){};
@@ -24,6 +28,7 @@ Cell::Cell(int x_pos, int y_pos, CellType cellType){
   y = y_pos;
   type = cellType;
   previousType = type;
+  cellDirection = UP;
 }
 
 CellType Cell::getCellType(){
@@ -52,4 +57,10 @@ void Cell::setY(int y_pos){
 }
 int Cell::getY(){
   return y;
+}
+CellDirection Cell::getCellDirection(){
+  return cellDirection;
+}
+void Cell::setCellDirection(CellDirection c){
+  cellDirection = c;
 }
