@@ -15,6 +15,8 @@
 #define WINDOW_WIDTH 1000
 #define WINDOW_HEIGHT 1000
 #define PI 3.1416
+#define MIN_HEIGHT 9
+#define MIN_WIDTH 11
 
 /*
 Students: Pau Balaguer and Didac Florensa
@@ -66,6 +68,10 @@ int main(int argc,char *argv[]){
   int w = atoi(argv[2]);
   int ghostsNumber = atoi(argv[3]);
 
+  if(h < MIN_HEIGHT) h = MIN_HEIGHT;
+  if(w < MIN_WIDTH) w = MIN_WIDTH;
+  if(w % 2 == 0) w += 1; //Must be even
+
   ROWS = h;
   COLUMNS = w;
 
@@ -78,8 +84,7 @@ int main(int argc,char *argv[]){
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   glutCreateWindow("PACMAN MAP");
   glEnable(GL_DEPTH_TEST);
-
-
+  glEnable(GL_LIGHTING);
 
   pacManTextures = new PacManTextures(COLUMNS, ROWS, WIDTH, HEIGHT, ghostsNumber);
 
@@ -89,7 +94,7 @@ int main(int argc,char *argv[]){
   glutKeyboardFunc(keyboard);
   glutIdleFunc(idle);
   glBindTexture(GL_TEXTURE_2D,0);
-  LoadTexture("cesped2.jpeg",64);
+  LoadTexture("cesped.jpg",64);
   glBindTexture(GL_TEXTURE_2D,1);
   LoadTexture("pared.jpg",64);
 
@@ -101,8 +106,13 @@ int main(int argc,char *argv[]){
 
 //------------------------------------------------------------
 void displayMap(){
+  GLint position[4];
+  GLfloat color[4];
+  GLfloat material[4];
   int i,j;
   Cell cell;
+
+  glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
 
   glClearColor(1.0,1.0,1.0,0.0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -123,6 +133,17 @@ void displayMap(){
   glPolygonMode(GL_FRONT,GL_FILL);
   glPolygonMode(GL_BACK,GL_FILL);
 
+  //-- Ambient light
+
+  position[0]=0; position[1]=1; position[2]=0; position[3]=0;
+  glLightiv(GL_LIGHT0,GL_POSITION,position);
+
+  color[0]=0; color[1]=0; color[2]=0; color[3]=1;
+  glLightfv(GL_LIGHT0,GL_AMBIENT,color);
+  glEnable(GL_LIGHT0);
+
+  material[0]=1.0; material[1]=1.0; material[2]=1.0; material[3]=1.0;
+  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
 
   for(i=0; i<COLUMNS; i++) {
     for(j=0; j<ROWS; j++){
@@ -136,15 +157,19 @@ void displayMap(){
 
 
   // Floor
+  material[0]=1.0; material[1]=1.0; material[2]=1.0; material[3]=1.0;
+  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
+
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D,0);
   glBegin(GL_QUADS);
-  glTexCoord2f(0,0); glVertex3i(WIDTH/2,0,HEIGHT/2);
-  glTexCoord2f(COLUMNS,0); glVertex3i(-WIDTH/2,0,HEIGHT/2);
-  glTexCoord2f(COLUMNS,ROWS); glVertex3i(-WIDTH/2,0,-HEIGHT/2);
-  glTexCoord2f(0,ROWS); glVertex3i(WIDTH/2,0,-HEIGHT/2);
+  glNormal3f(0,0.2,0);
+  glVertex3i(WIDTH/2,0,HEIGHT/2);
+  glVertex3i(-WIDTH/2,0,HEIGHT/2);
+  glVertex3i(-WIDTH/2,0,-HEIGHT/2);
+  glVertex3i(WIDTH/2,0,-HEIGHT/2);
   glEnd();
-  glDisable(GL_TEXTURE_2D);
+
   glutSwapBuffers();
 }
 

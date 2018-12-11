@@ -188,6 +188,7 @@ public:
       material[0]=0.0; material[1]=0.0; material[2]=1.0; material[3]=1.0;
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
       glBegin(GL_QUADS);
+      glNormal3f(0,0,1);
       glVertex3i(x,y,z);
       glVertex3i(x,y+Y,z);
       glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z);
@@ -197,6 +198,7 @@ public:
       material[0]=0.0; material[1]=1.0; material[2]=0.0; material[3]=1.0;
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
       glBegin(GL_QUADS);
+      glNormal3f(1,0,0);
       glVertex3i(x+PIXELS_PER_COLUMN,y,z);
       glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z);
       glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z-PIXELS_PER_ROW);
@@ -206,6 +208,7 @@ public:
       material[0]=1.0; material[1]=0.0; material[2]=0.0; material[3]=1.0;
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
       glBegin(GL_QUADS);
+      glNormal3f(-1,0,0);
       glVertex3i(x,y,z);
       glVertex3i(x,y+Y,z);
       glVertex3i(x,y+Y,z-PIXELS_PER_ROW);
@@ -215,6 +218,7 @@ public:
       material[0]=1.0; material[1]=0.0; material[2]=1.0; material[3]=1.0;
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
       glBegin(GL_QUADS);
+      glNormal3f(0,0,-1);
       glVertex3i(x,y,z-PIXELS_PER_ROW);
       glVertex3i(x,y+Y,z-PIXELS_PER_ROW);
       glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z-PIXELS_PER_ROW);
@@ -224,6 +228,7 @@ public:
       material[0]=0.0; material[1]=0.0; material[2]=0.0; material[3]=1.0;
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
       glBegin(GL_QUADS);
+      glNormal3f(0,1,0);
       glVertex3i(x,y+Y,z);
       glVertex3i(x,y+Y,z-PIXELS_PER_ROW);
       glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z-PIXELS_PER_ROW);

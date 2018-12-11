@@ -22,6 +22,7 @@ private:
   int *ghostsXPos;
   int *ghostsYPos;
   particle *ghosts;
+  GLenum *ghostLights;
 
   int COLUMNS;
   int ROWS;
@@ -72,7 +73,7 @@ private:
     return (n * pixels) ;
   }
 
-  void setPlayerPosition(int newX, int newY){
+  void setPlayerPosition(int newX, int newY, ParticleDirection direction){
     if(isWall(newX, newY)) return;
 
     int oldXPos = playerXPos;
@@ -80,7 +81,7 @@ private:
 
     playerXPos = newX;
     playerYPos = newY;
-    player.init_movement(getPosition(playerXPos, PIXELS_PER_COLUMN), getPosition(playerYPos, PIXELS_PER_ROW), DURATION);
+    player.init_movement(getPosition(playerXPos, PIXELS_PER_COLUMN), getPosition(playerYPos, PIXELS_PER_ROW), DURATION, direction, GL_LIGHT1);
 
     map[newY][newX].setCellType(PLAYER);
     map[oldYPos][oldXPos].setCellType(CORRIDOR);
@@ -94,17 +95,21 @@ private:
   }
 
   void setGhostsPositions(long t){
-    int direct[][2] = {{0,1}, {0,-1}, {-1,0}, {1,0}};
+    int direct[][3] = {{0,1,0}, {0,-1, 1}, {-1,0,2}, {1,0,3}};
+    GLenum lights[6] = {GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7};
+
 
     for(int i = 0; i < GHOSTS; i++){
       if(ghosts[i].isReady()){
         int pos;
         int ni, nj;
+        ParticleDirection direction;
 
         do{
           pos = rand() % 4;
           ni = ghostsXPos[i] + direct[pos][0];
           nj = ghostsYPos[i] + direct[pos][1];
+          direction = getParticleDirection(direct[pos][2]);
         }while(map[nj][ni].getCellType() == WALL);
 
         CellType cellType = map[ghostsYPos[i]][ghostsXPos[i]].getPreviousCellType();
@@ -112,7 +117,7 @@ private:
         map[ghostsYPos[i]][ghostsXPos[i]].setCellType(cellType);
         ghostsXPos[i] = ni;
         ghostsYPos[i] = nj;
-        ghosts[i].init_movement(getPosition(ni, PIXELS_PER_COLUMN), getPosition(nj, PIXELS_PER_ROW), DURATION);
+        ghosts[i].init_movement(getPosition(ni, PIXELS_PER_COLUMN), getPosition(nj, PIXELS_PER_ROW), DURATION, direction, lights[i]);
       }
 
       ghosts[i].integrate(t);
@@ -132,6 +137,13 @@ private:
     gluSphere(quad,radius,100,20);
     glEnd();
     glPopMatrix();
+  }
+
+  ParticleDirection getParticleDirection(int val){
+    if(val == 0) return UP;
+    if(val == 1) return DOWN;
+    if(val == 2) return LEFT;
+    return RIGHT;
   }
 
 public:
@@ -162,6 +174,8 @@ public:
   }
 
   void drawCorridor(int i, int j){
+    GLfloat material[4] = {1.0, 1.0, 1.0, 1.0};
+
     Cell cell = map[j][i];
     if(cell.getCellType() == WALL) {
       float x = (i * PIXELS_PER_COLUMN) + WIDTH_DISPLACEMENT;
@@ -170,15 +184,16 @@ public:
 
       glEnable(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D,1);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
       glBegin(GL_QUADS);
+      glNormal3f(0,0,1);
       glTexCoord2f(0,0);glVertex3i(x,y,z);
       glTexCoord2f(1,0);glVertex3i(x,y+Y,z);
       glTexCoord2f(1, 1);glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z);
       glTexCoord2f(0,1);glVertex3i(x+PIXELS_PER_COLUMN,y,z);
       glEnd();
 
-
-
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
       glBegin(GL_QUADS);
       glTexCoord2f(0,0);glVertex3i(x+PIXELS_PER_COLUMN,y,z);
       glTexCoord2f(1,0);glVertex3i(x+PIXELS_PER_COLUMN,y+Y,z);
@@ -186,18 +201,15 @@ public:
       glTexCoord2f(0,1);glVertex3i(x+PIXELS_PER_COLUMN,y,z-PIXELS_PER_ROW);
       glEnd();
 
-
-
-
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
       glBegin(GL_QUADS);
       glTexCoord2f(0,0);glVertex3i(x,y,z);
       glTexCoord2f(1,0);glVertex3i(x,y+Y,z);
-       glTexCoord2f(1, 1);glVertex3i(x,y+Y,z-PIXELS_PER_ROW);
+      glTexCoord2f(1, 1);glVertex3i(x,y+Y,z-PIXELS_PER_ROW);
       glTexCoord2f(0,1);glVertex3i(x,y,z-PIXELS_PER_ROW);
       glEnd();
 
-
-
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
       glBegin(GL_QUADS);
       glTexCoord2f(0,0);glVertex3i(x,y,z-PIXELS_PER_ROW);
       glTexCoord2f(1,0);glVertex3i(x,y+Y,z-PIXELS_PER_ROW);
@@ -205,9 +217,7 @@ public:
       glTexCoord2f(0,1);glVertex3i(x+PIXELS_PER_COLUMN,y,z-PIXELS_PER_ROW);
       glEnd();
 
-
-
-
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
       glBegin(GL_QUADS);
       glTexCoord2f(0,0);glVertex3i(x,y+Y,z);
       glTexCoord2f(1,0);glVertex3i(x,y+Y,z-PIXELS_PER_ROW);
@@ -245,19 +255,19 @@ public:
   }
 
   void playerUP(){
-    setPlayerPosition(playerXPos, playerYPos+1);
+    setPlayerPosition(playerXPos, playerYPos+1, UP);
   }
 
   void playerDOWN(){
-    setPlayerPosition(playerXPos, playerYPos-1);
+    setPlayerPosition(playerXPos, playerYPos-1, DOWN);
   }
 
   void playerLEFT(){
-    setPlayerPosition(playerXPos-1, playerYPos);
+    setPlayerPosition(playerXPos-1, playerYPos, LEFT);
   }
 
   void playerRIGHT(){
-    setPlayerPosition(playerXPos+1, playerYPos);
+    setPlayerPosition(playerXPos+1, playerYPos, RIGHT);
   }
 
   void integrate(long t){

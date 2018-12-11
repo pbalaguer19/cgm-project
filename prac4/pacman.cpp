@@ -14,6 +14,8 @@
 #define WINDOW_WIDTH 1000
 #define WINDOW_HEIGHT 1000
 #define PI 3.1416
+#define MIN_HEIGHT 9
+#define MIN_WIDTH 11
 
 /*
 Students: Pau Balaguer and Didac Florensa
@@ -61,6 +63,10 @@ int main(int argc,char *argv[]){
   int h = atoi(argv[1]);
   int w = atoi(argv[2]);
   int ghostsNumber = atoi(argv[3]);
+
+  if(h < MIN_HEIGHT) h = MIN_HEIGHT;
+  if(w < MIN_WIDTH) w = MIN_WIDTH;
+  if(w % 2 == 0) w += 1; //Must be even
 
   ROWS = h;
   COLUMNS = w;
@@ -142,6 +148,7 @@ void displayMap(){
   glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
 
   glBegin(GL_QUADS);
+  glNormal3f(0,0.2,0);
   glVertex3i(WIDTH/2,0,HEIGHT/2);
   glVertex3i(-WIDTH/2,0,HEIGHT/2);
   glVertex3i(-WIDTH/2,0,-HEIGHT/2);
