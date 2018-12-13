@@ -85,7 +85,7 @@ int main(int argc,char *argv[]){
   glutCreateWindow("PACMAN MAP");
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
-  
+
   pacManTextures = new PacManTextures(COLUMNS, ROWS, WIDTH, HEIGHT, ghostsNumber);
 
   glutDisplayFunc(displayMap);
@@ -134,15 +134,21 @@ void displayMap(){
   glPolygonMode(GL_BACK,GL_FILL);
 
   //-- Ambient light
-  position[0]=0; position[1]=1; position[2]=0; position[3]=0;
+  position[0]=0; position[1]=0; position[2]=0; position[3]=1;
   glLightiv(GL_LIGHT0,GL_POSITION,position);
 
-  color[0]=0; color[1]=0; color[2]=0; color[3]=1;
+  color[0]=0.1; color[1]=0.1; color[2]=0.1; color[3]=1;
   glLightfv(GL_LIGHT0,GL_AMBIENT,color);
-  glEnable(GL_LIGHT0);
 
-  material[0]=1.0; material[1]=0.0; material[2]=0.0; material[3]=1.0;
-  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,material);
+  color[0]=0.0; color[1]=0.0; color[2]=0.0; color[3]=1;
+  glLightfv(GL_LIGHT0,GL_DIFFUSE,color);
+  glLightfv(GL_LIGHT0,GL_SPECULAR,color);
+
+  glEnable(GL_LIGHT0);
+  color[0]=0.0; color[1]=0.0; color[2]=0.0; color[3]=1;
+  glLightfv(GL_LIGHT0,GL_AMBIENT,color);
+  glLightfv(GL_LIGHT0,GL_SPECULAR,color);
+  //-- End ambient
 
   for(i=0; i<COLUMNS; i++) {
     for(j=0; j<ROWS; j++){
